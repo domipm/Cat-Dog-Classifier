@@ -8,8 +8,9 @@ import os
 
 from PIL import Image
 
+from datetime import datetime
+
 from torch.utils.data import Dataset
-from torchvision import datasets, transforms
 from torchvision.transforms import v2
 
 # Find device to use (graphic acceleration if available)
@@ -21,9 +22,38 @@ train_dir = "./catdog_data/train/"
 test_dir = "./catdog_data/test/"
 valid_dir = "./catdog_data/validation/"
 
-# Set seed for randomizers
-rand_seed = 42
+# Set seed for image selector
+rand_seed = 314159265
+#rand_seed = datetime.now().timestamp()
 random.seed(rand_seed)
+# Set seed for pytorch (...)
+torch.manual_seed(rand_seed)
+
+# Image transformation properties
+image_size =   [512,512]
+flip_prob =    0.5
+bright_range = [0.5,1.5]
+contr_range =  [0.5,1.5]
+satr_range =   [0.5,1.5]
+hue_range =    [-0.15, 0.15]
+deg_range =    [-15,15]
+transl_range = [0,0.15]
+scale_rage =   [0.75,1.5]
+shear_range =  [-1,1]
+qual_range =   np.random.randint(15,100)
+
+# Define transform to use for data augmentation
+data_transform = v2.Compose([
+    v2.Resize(image_size),                              # Resize all images to the same square size
+    v2.RandomHorizontalFlip(p = flip_prob),             # Horizontally flip images randomly
+    v2.RandomRotation(degrees = deg_range),             # Rotate and expand the image
+    v2.JPEG(quality = qual_range),                      # Add JPEG compression noise randomly
+    v2.ColorJitter(brightness = bright_range,           # Randomly change brightness, contrast, saturation, hue (within reason)
+                           contrast = contr_range, 
+                           saturation = satr_range,    
+                           hue = hue_range
+                           ),
+])
 
 # Custom class for loading cats and dogs dataset
 class CatsDogsDataset(Dataset):
@@ -50,33 +80,60 @@ class CatsDogsDataset(Dataset):
         file = self.images[indx]
         class_type = file.split(".")[0] + "s"
         path = self.directory + class_type + "/" + file    
-        # Open image using PIL (transformations?)
+        # Open image using PIL
         image = Image.open(path) 
         # Return image and its class
         return image, class_type
     
     # Function that shows random image in the dataset
     def show_random(self):
+        # Pick random class
+        rand_class = random.choice(self.classes)
+        rand_image = random.choice(os.listdir(self.directory + rand_class + "/"))
+        # Read image using matplotlib image
+        image = ilt.imread(self.directory + rand_class + "/" + rand_image)
+        # Show image using matplotlib
+        plt.title(rand_image)
+        plt.axis("Off")
+        plt.imshow(image)
+        plt.show()
+    
+        return
+
+    # Just to showcase how the original and randomly transformed image
+    def show_random_transform(self, show = False, save = True):
         # Pick random class and image
         rand_class = random.choice(self.classes)
-        rand_image = random.choice(self.images)
+        rand_image = random.choice(os.listdir(self.directory + rand_class + "/"))
         # Full directory
         image_dir = self.directory + rand_class + "/" + rand_image
         # Read image using matplotlib image
-        image = ilt.imread(image_dir)
-        # Show image using matplotlib
-        plt.title(rand_image)
-        plt.axis("off")
-        plt.imshow(image)
-        plt.show()
+        image = Image.open(image_dir)
+        # Apply the transformations (a couple of times)
+        n_transforms = 3
+        image_transformed = np.empty(n_transforms, dtype=object)
 
+        # Setup matplotlib and show/save sample figure
+        fig, ax = plt.subplots(nrows=1, ncols=4)
+        fig.set_size_inches(8,3)
+        # Show original
+        ax[0].imshow(image)
+        ax[0].set_title(rand_image)
+        ax[0].set_title(rand_class + str(rand_image).split(".")[1] + "(Org)")
+        ax[0].axis("Off")
+        # Show samples
+        for i in range(n_transforms):
+            image_transformed[i] = data_transform(image)
+            ax[i+1].imshow(image_transformed[i])
+            ax[i+1].set_title(rand_class + str(rand_image).split(".")[1] + "(Aug)")
+            ax[i+1].axis("Off")
+        # Save figure
+        plt.savefig("./samples/" + rand_class.split("s")[0] + str(rand_image).split(".")[1] + ".png", bbox_inches="tight",dpi=300)
+        if show == True: plt.show()
+        
         return
     
-    # Just to showcase how the defined transformations work on a sample image
-    def show_random_transform(self):
-        return
-    
-    # Function that returns all images inside given folder
+    # Function that returns all images in dataset
     def list_images(self):
 
         arr = []
@@ -89,6 +146,8 @@ class CatsDogsDataset(Dataset):
         return arr
 
 train_dataset = CatsDogsDataset(train_dir)
-train_dataset.show_random()
-print(train_dataset.__len__())
-train_dataset[0]
+#train_dataset.show_random()
+#print(train_dataset.__len__())
+#train_dataset[0]
+
+train_dataset.show_random_transform()
