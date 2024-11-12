@@ -38,7 +38,7 @@ contr_range  =   [0.5,1.5]
 satr_range   =   [0.5,1.5]
 
 # Define transform to use for data augmentation
-data_transform = v2.Compose([
+transform_on_image = v2.Compose([
     v2.Resize(image_size),                      # Resize all images to the same square size
     v2.RandomHorizontalFlip(p = flip_prob),     # Horizontally flip images randomly
     v2.RandomRotation(degrees = deg_range),     # Rotate and expand the image
@@ -81,13 +81,13 @@ class CatsDogsDataset(Dataset):
         # Open image using PIL
         image = Image.open(path)
         # Apply augmentation transforms
-        image = data_transform(image)
+        image = transform_on_image(image)
         # Apply image-to-tensor transform
         image = transform_to_tensor(image)
         # Return image and its class
         return image, class_type
     
-    # Function that shows random image in the dataset
+    # Function that shows random image in the dataset (without transform))
     def show_random(self):
         # Pick random class
         rand_class = random.choice(self.classes)
@@ -120,7 +120,7 @@ class CatsDogsDataset(Dataset):
         ax[0].axis("Off")
         # Show samples
         for i in range(n_transforms):
-            image_transformed[i] = data_transform(image)
+            image_transformed[i] = transform_on_image(image)
             ax[i+1].imshow(image_transformed[i])
             ax[i+1].set_title(rand_class + str(rand_image).split(".")[1] + "(Aug)")
             ax[i+1].axis("Off")
