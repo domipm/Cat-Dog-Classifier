@@ -40,29 +40,33 @@ satr_range   =   [0.5,1.5]
 
 # Define transform to use for data augmentation
 data_transform = v2.Compose([
-    v2.Resize(image_size),                              # Resize all images to the same square size
-    v2.RandomHorizontalFlip(p = flip_prob),             # Horizontally flip images randomly
-    v2.RandomRotation(degrees = deg_range),             # Rotate and expand the image
-    v2.JPEG(quality = qual_range),                      # Add JPEG compression noise randomly
-    v2.ColorJitter(brightness = bright_range,           # Randomly change brightness, contrast, saturation (within reason)
-                           contrast = contr_range, 
-                           saturation = satr_range
-                           ),
+    v2.Resize(image_size),                      # Resize all images to the same square size
+    v2.RandomHorizontalFlip(p = flip_prob),     # Horizontally flip images randomly
+    v2.RandomRotation(degrees = deg_range),     # Rotate and expand the image
+    v2.JPEG(quality = qual_range),              # Add JPEG compression noise randomly
+    v2.ColorJitter(brightness = bright_range,   # Randomly change brightness, contrast, saturation (within reason)
+                    contrast = contr_range, 
+                    saturation = satr_range
+                    )
+])
+
+# Data transformation used (as a last step) to get the tensor image
+transform_to_tensor = v2.Compose([
+    v2.ToImage(),
+    v2.ToDtype(torch.float32, scale = True)
 ])
 
 # Custom class for loading cats and dogs dataset
 class CatsDogsDataset(Dataset):
 
     # Initialization function for dataset
-    def __init__(self, directory, transform):
+    def __init__(self, directory):
         # Set the directory (train, valid, test)
         self.directory = directory
         # List of all classes to classify (folders in directory, ignores hidden files)
         self.classes = [f for f in os.listdir(directory) if not f.startswith('.')]
         # List of all the images in dataset
         self.images = self.list_images()
-        # Set what data transform to use
-        self.transform = data_transform
         return
     
     # Return size of dataset (numer of all images)
@@ -73,10 +77,14 @@ class CatsDogsDataset(Dataset):
     def __getitem__(self, indx):
         # Find path of image indexed (dataset directory + folder class name from file name + file)
         file = self.images[indx]
-        class_type = file.split(".")[0] + "s"
-        path = self.directory + class_type + "/" + file    
+        class_type = file.split(".")[0]
+        path = self.directory + class_type + "s/" + file    
         # Open image using PIL
-        image = Image.open(path) 
+        image = Image.open(path)
+        # Apply augmentation transforms
+        image = data_transform(image)
+        # Apply image-to-tensor transform
+        image = transform_to_tensor(image)
         # Return image and its class
         return image, class_type
     
@@ -115,7 +123,7 @@ class CatsDogsDataset(Dataset):
         ax[0].axis("Off")
         # Show samples
         for i in range(n_transforms):
-            image_transformed[i] = self.transform(image)
+            image_transformed[i] = data_transform(image)
             ax[i+1].imshow(image_transformed[i])
             ax[i+1].set_title(rand_class + str(rand_image).split(".")[1] + "(Aug)")
             ax[i+1].axis("Off")
@@ -136,5 +144,7 @@ class CatsDogsDataset(Dataset):
                 arr.append(file)
         return arr
 
-train_dataset = CatsDogsDataset(train_dir, data_transform)
+train_dataset = CatsDogsDataset(train_dir)
 train_dataset.show_random_transform(show=True, save=False)
+
+print((train_dataset[1]))
