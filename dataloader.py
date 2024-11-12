@@ -54,13 +54,15 @@ data_transform = v2.Compose([
 class CatsDogsDataset(Dataset):
 
     # Initialization function for dataset
-    def __init__(self, directory, transform = None):
+    def __init__(self, directory, transform):
         # Set the directory (train, valid, test)
         self.directory = directory
         # List of all classes to classify (folders in directory, ignores hidden files)
         self.classes = [f for f in os.listdir(directory) if not f.startswith('.')]
         # List of all the images in dataset
         self.images = self.list_images()
+        # Set what data transform to use
+        self.transform = data_transform
         return
     
     # Return size of dataset (numer of all images)
@@ -113,7 +115,7 @@ class CatsDogsDataset(Dataset):
         ax[0].axis("Off")
         # Show samples
         for i in range(n_transforms):
-            image_transformed[i] = data_transform(image)
+            image_transformed[i] = self.transform(image)
             ax[i+1].imshow(image_transformed[i])
             ax[i+1].set_title(rand_class + str(rand_image).split(".")[1] + "(Aug)")
             ax[i+1].axis("Off")
@@ -134,5 +136,5 @@ class CatsDogsDataset(Dataset):
                 arr.append(file)
         return arr
 
-train_dataset = CatsDogsDataset(train_dir)
+train_dataset = CatsDogsDataset(train_dir, data_transform)
 train_dataset.show_random_transform(show=True, save=False)
