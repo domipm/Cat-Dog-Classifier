@@ -13,7 +13,7 @@ from datetime import datetime
 from torch.utils.data import Dataset
 from torchvision.transforms import v2
 
-# Find device to use (graphic acceleration if available)
+# Find device to use (graphic acceleration if available) (not used right now?)
 device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
 print("Using device: " + device)
 
@@ -22,25 +22,21 @@ train_dir = "./catdog_data/train/"
 test_dir = "./catdog_data/test/"
 valid_dir = "./catdog_data/validation/"
 
+# Seed for random numbers (based on current time, change to set fixed seed)
+rand_seed = datetime.now().timestamp()
 # Set seed for image selector
-rand_seed = 314159265
-#rand_seed = datetime.now().timestamp()
 random.seed(rand_seed)
-# Set seed for pytorch (...)
+# Set seed for pytorch
 torch.manual_seed(rand_seed)
 
 # Image transformation properties
-image_size =   [512,512]
-flip_prob =    0.5
-bright_range = [0.5,1.5]
-contr_range =  [0.5,1.5]
-satr_range =   [0.5,1.5]
-hue_range =    [-0.15, 0.15]
-deg_range =    [-15,15]
-transl_range = [0,0.15]
-scale_rage =   [0.75,1.5]
-shear_range =  [-1,1]
-qual_range =   np.random.randint(15,100)
+image_size   =   [512,512]
+flip_prob    =   0.5
+deg_range    =   [-45,45]
+qual_range   =   np.random.randint(15,100)
+bright_range =   [0.5,1.5]
+contr_range  =   [0.5,1.5]
+satr_range   =   [0.5,1.5]
 
 # Define transform to use for data augmentation
 data_transform = v2.Compose([
@@ -48,10 +44,9 @@ data_transform = v2.Compose([
     v2.RandomHorizontalFlip(p = flip_prob),             # Horizontally flip images randomly
     v2.RandomRotation(degrees = deg_range),             # Rotate and expand the image
     v2.JPEG(quality = qual_range),                      # Add JPEG compression noise randomly
-    v2.ColorJitter(brightness = bright_range,           # Randomly change brightness, contrast, saturation, hue (within reason)
+    v2.ColorJitter(brightness = bright_range,           # Randomly change brightness, contrast, saturation (within reason)
                            contrast = contr_range, 
-                           saturation = satr_range,    
-                           hue = hue_range
+                           saturation = satr_range
                            ),
 ])
 
@@ -60,14 +55,12 @@ class CatsDogsDataset(Dataset):
 
     # Initialization function for dataset
     def __init__(self, directory, transform = None):
-
         # Set the directory (train, valid, test)
         self.directory = directory
         # List of all classes to classify (folders in directory, ignores hidden files)
         self.classes = [f for f in os.listdir(directory) if not f.startswith('.')]
         # List of all the images in dataset
         self.images = self.list_images()
-
         return
     
     # Return size of dataset (numer of all images)
@@ -97,7 +90,6 @@ class CatsDogsDataset(Dataset):
         plt.axis("Off")
         plt.imshow(image)
         plt.show()
-    
         return
 
     # Just to showcase how the original and randomly transformed image
@@ -112,10 +104,8 @@ class CatsDogsDataset(Dataset):
         # Apply the transformations (a couple of times)
         n_transforms = 3
         image_transformed = np.empty(n_transforms, dtype=object)
-
         # Setup matplotlib and show/save sample figure
         fig, ax = plt.subplots(nrows=1, ncols=4)
-        fig.set_size_inches(8,3)
         # Show original
         ax[0].imshow(image)
         ax[0].set_title(rand_image)
@@ -128,26 +118,21 @@ class CatsDogsDataset(Dataset):
             ax[i+1].set_title(rand_class + str(rand_image).split(".")[1] + "(Aug)")
             ax[i+1].axis("Off")
         # Save figure
-        plt.savefig("./samples/" + rand_class.split("s")[0] + str(rand_image).split(".")[1] + ".png", bbox_inches="tight",dpi=300)
+        if save == True: plt.savefig("./samples/" + rand_class.split("s")[0] + str(rand_image).split(".")[1] + ".png", bbox_inches="tight",dpi=300)
         if show == True: plt.show()
-        
         return
     
-    # Function that returns all images in dataset
+    # Function that returns all images in dataset (their paths and names)
     def list_images(self):
-
-        arr = []
-        dir = []
+        # Define relevant arrays
+        arr, dir = [], []
+        # Iterate over all classes, and over all files in each class subfolder
         for class_type in self.classes:
             for file in os.listdir(self.directory + class_type + "/"):
+                # Append file path and file to arrays
                 dir.append(self.directory + class_type + "/" + file)
                 arr.append(file)
-
         return arr
 
 train_dataset = CatsDogsDataset(train_dir)
-#train_dataset.show_random()
-#print(train_dataset.__len__())
-#train_dataset[0]
-
-train_dataset.show_random_transform()
+train_dataset.show_random_transform(show=True, save=False)
