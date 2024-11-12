@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.image as ilt
 
 import torch
 import random
@@ -93,8 +92,8 @@ class CatsDogsDataset(Dataset):
         # Pick random class
         rand_class = random.choice(self.classes)
         rand_image = random.choice(os.listdir(self.directory + rand_class + "/"))
-        # Read image using matplotlib image
-        image = ilt.imread(self.directory + rand_class + "/" + rand_image)
+        # Read image using PIL Image
+        image = Image.open(self.directory + rand_class + "/" + rand_image)
         # Show image using matplotlib
         plt.title(rand_image)
         plt.axis("Off")
@@ -107,10 +106,8 @@ class CatsDogsDataset(Dataset):
         # Pick random class and image
         rand_class = random.choice(self.classes)
         rand_image = random.choice(os.listdir(self.directory + rand_class + "/"))
-        # Full directory
-        image_dir = self.directory + rand_class + "/" + rand_image
-        # Read image using matplotlib image
-        image = Image.open(image_dir)
+        # Read image using PIL Image
+        image = Image.open(self.directory + rand_class + "/" + rand_image)
         # Apply the transformations (a couple of times)
         n_transforms = 3
         image_transformed = np.empty(n_transforms, dtype=object)
@@ -143,8 +140,3 @@ class CatsDogsDataset(Dataset):
                 dir.append(self.directory + class_type + "/" + file)
                 arr.append(file)
         return arr
-
-train_dataset = CatsDogsDataset(train_dir)
-train_dataset.show_random_transform(show=True, save=False)
-
-print((train_dataset[1]))
