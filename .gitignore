@@ -163,6 +163,7 @@ cython_debug/
 
 # Vscode
 .DS_Store
+.tempCodeRunnerFile.py
 
 # Dataset (ignore for now)
 /catdog_data/
