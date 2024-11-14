@@ -20,10 +20,6 @@ train_dir = "./catdog_data/train/"
 test_dir = "./catdog_data/test/"
 valid_dir = "./catdog_data/validation/"
 
-# Find device to use (graphic acceleration if available) (not used right now?)
-device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
-print("\nUsing device: " + str(device) + "\n")
-
 # Seed for random numbers (based on current time, change to set fixed seed)
 rand_seed = datetime.now().timestamp()
 # Set seed for image selector
