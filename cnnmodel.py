@@ -60,8 +60,9 @@ class CNN(nn.Module):
         
         return output
     
+    # Function to print out model's summary
     def model_summary(self, in_size):
 
-        summary(CNN(), input_size = in_size)
+        summary(self, input_size = in_size)
         print()
         return
