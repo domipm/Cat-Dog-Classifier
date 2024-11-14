@@ -4,8 +4,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import torch
+import torch.nn as nn
 import torch.optim as optim
 import torch.functional as F
+
+from torch.utils.data import DataLoader
 
 import dataloader
 import cnnmodel
@@ -36,9 +39,10 @@ workers = 0
 train_dataset = dataloader.CatsDogsDataset(train_dir)
 test_dataset = dataloader.CatsDogsDataset(test_dir)
 # Load dataset into pytorch
-train_loader = torch.utils.data.DataLoader(train_dataset, batch_size = batchsize, num_workers = workers, shuffle = True)
-test_loader = torch.utils.data.DataLoader(test_dataset, batch_size = batchsize, num_workers = workers, shuffle = False)
+train_loader = DataLoader(train_dataset, batch_size = batchsize, num_workers = workers, shuffle = True)
+test_loader = DataLoader(test_dataset, batch_size = batchsize, num_workers = workers, shuffle = False)
 
 # Initiaize CNN model
 model = cnnmodel.CNN()
-model.model_summary(in_size=(3,512,512))
+# Print-out model's summary
+model.model_summary(in_size = (tuple(train_dataset[0][0].shape)))
