@@ -47,7 +47,13 @@ class CatsDogsDataset(Dataset):
         # Set the directory (train, valid, test)
         self.directory = directory
         # List of all classes to classify (folders in directory, ignores hidden files)
-        self.classes = [f for f in os.listdir(directory) if not f.startswith('.')]
+        self.classes_folders = [f for f in os.listdir(directory) if not f.startswith('.')]
+        # List of all classes (folders without 's')
+        self.classes = []
+        for obj in self.classes_folders:
+            self.classes.append(obj[:-1])
+        # Class-to-integer encoding
+        self.class_to_idx = {class_name: idx for idx, class_name in enumerate(self.classes)}
         # List of all the images in dataset
         self.images = self.list_images()
         return
@@ -68,13 +74,15 @@ class CatsDogsDataset(Dataset):
         image = transform_on_image(image)
         # Apply image-to-tensor transform
         image = transform_to_tensor(image)
-        # Return image and its class
+        # Convert class_type into tensor
+        class_type = self.class_to_idx[class_type]
+        # Return image and class, both tensors
         return image, class_type
     
     # Function that shows random image in the dataset (without transform))
     def show_random(self):
         # Pick random class
-        rand_class = random.choice(self.classes)
+        rand_class = random.choice(self.classes_folders)
         rand_image = random.choice(os.listdir(self.directory + rand_class + "/"))
         # Read image using PIL Image
         image = Image.open(self.directory + rand_class + "/" + rand_image)
@@ -88,7 +96,7 @@ class CatsDogsDataset(Dataset):
     # Just to showcase how the original and randomly transformed image
     def show_random_transform(self, show = False, save = True):
         # Pick random class and image
-        rand_class = random.choice(self.classes)
+        rand_class = random.choice(self.classes_folders)
         rand_image = random.choice(os.listdir(self.directory + rand_class + "/"))
         # Read image using PIL Image
         image = Image.open(self.directory + rand_class + "/" + rand_image)
@@ -118,7 +126,7 @@ class CatsDogsDataset(Dataset):
         # Define relevant arrays
         arr, dir = [], []
         # Iterate over all classes, and over all files in each class subfolder
-        for class_type in self.classes:
+        for class_type in self.classes_folders:
             for file in os.listdir(self.directory + class_type + "/"):
                 # Append file path and file to arrays
                 dir.append(self.directory + class_type + "/" + file)
