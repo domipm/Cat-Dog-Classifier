@@ -112,7 +112,7 @@ class CatsDogsDataset(Dataset):
         n_transforms = 3
         image_transformed = np.empty(n_transforms, dtype=object)
         # Setup matplotlib and show/save sample figure
-        fig, ax = plt.subplots(nrows=1, ncols=4)
+        _, ax = plt.subplots(nrows=1, ncols=4)
         # Show original
         ax[0].imshow(image)
         ax[0].set_title(rand_image)
