@@ -7,6 +7,8 @@ import torch.nn.functional as F
 from torchsummary import summary
 
 class CNN(nn.Module):
+
+    # Initialization function with definitions for all layers
     def __init__(self):
 
         super().__init__()
@@ -25,51 +27,41 @@ class CNN(nn.Module):
         
         return
     
+    # Forward pass of the networks
     def forward(self, x):
 
         # First Convolutional Layer + ReLU Activation
         x = self.conv1(x)
-        print("Convolution Layer 1")
-        print(x.size())
         x = F.relu(x)
 
         # First Pooling Layer
         x = self.pool1(x)
-        print("Pooling Layer 1")
-        print(x.size())
 
         # Second Convolutional Layer + ReLU Activation
         x = self.conv2(x)
-        print("Convolution Layer 2")
-        print(x.size())
         x = F.relu(x)
 
         # Second Pooling Layer
         x = self.pool2(x)
-        print("Pooling Layer 2")
-        print(x.size())
 
         # Flatten Tensor to Vector
         x = x.view(-1, 32*128*128)
-        print("Flatten Tensor")
-        print(x.size())
 
         # First Fully-Connected (Dense) Layer -> THIS STEP STOPS WORKING!
         x = self.dense1(x)
         x = F.relu(x)
-        print("Linear Layer 1")
-        print(x.size())
 
         # Second Fully-Connected (Dense) Layer
         x = self.dense2(x)
         x = F.relu(x)
-        print("Linear Layer 2")
-        print(x.size())
 
         # Non-Linear Activation Function
-        output = F.log_softmax(x)
+        output = F.log_softmax(x, dim=1)
         
         return output
+    
+    def model_summary(self, in_size):
 
-# Print model summary for an input size of (3, 512, 512)
-summary(CNN(), input_size=(3, 512, 512))
+        summary(CNN(), input_size = in_size)
+        print()
+        return

@@ -12,22 +12,6 @@ from datetime import datetime
 from torch.utils.data import Dataset
 from torchvision.transforms import v2
 
-# Find device to use (graphic acceleration if available) (not used right now?)
-device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
-print("Using device: " + device)
-
-# Folder paths for testing and training
-train_dir = "./catdog_data/train/"
-test_dir = "./catdog_data/test/"
-valid_dir = "./catdog_data/validation/"
-
-# Seed for random numbers (based on current time, change to set fixed seed)
-rand_seed = datetime.now().timestamp()
-# Set seed for image selector
-random.seed(rand_seed)
-# Set seed for pytorch
-torch.manual_seed(rand_seed)
-
 # Image transformation properties
 image_size   =   [512,512]
 flip_prob    =   0.5
