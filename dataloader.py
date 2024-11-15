@@ -124,11 +124,9 @@ class CatsDogsDataset(Dataset):
     # Function that returns all images in dataset (their paths and names)
     def list_images(self):
         # Define relevant arrays
-        arr, dir = [], []
+        arr = []
         # Iterate over all classes, and over all files in each class subfolder
         for class_type in self.classes_folders:
             for file in os.listdir(self.directory + class_type + "/"):
-                # Append file path and file to arrays
-                dir.append(self.directory + class_type + "/" + file)
                 arr.append(file)
         return arr
