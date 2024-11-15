@@ -22,9 +22,9 @@ class CNN(nn.Module):
         self.pool2 = nn.MaxPool2d(kernel_size=2, stride=2, padding=0)
 
         # Fully-Connected Dense Layers
-        self.dense1 = nn.Linear(in_features=32*128*128, out_features=128)
-        self.dense2 = nn.Linear(in_features=128, out_features=2)
-        
+        self.dense1 = nn.LazyLinear(out_features=128)
+        self.dense2 = nn.LazyLinear(out_features=64)
+
         return
     
     # Forward pass of the networks
