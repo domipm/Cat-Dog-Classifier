@@ -18,12 +18,11 @@ class CNN(nn.Module):
         self.conv2 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, stride=1, padding=1)
 
         # Pooling Layers
-        self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2, padding=0)
-        self.pool2 = nn.MaxPool2d(kernel_size=2, stride=2, padding=0)
+        self.pool = nn.MaxPool2d(kernel_size=2, stride=2, padding=0)
 
         # Fully-Connected Dense Layers
         self.dense1 = nn.LazyLinear(out_features=128)
-        self.dense2 = nn.LazyLinear(out_features=64)
+        self.dense2 = nn.LazyLinear(out_features=2)
 
         return
     
@@ -37,7 +36,7 @@ class CNN(nn.Module):
 
         # First Pooling Layer
         # (16x512x512) -> (16x256x256)
-        x = self.pool1(x)
+        x = self.pool(x)
 
         # Second Convolutional Layer + ReLU Activation
         # (16x256x256) -> (32x256x256)
@@ -46,7 +45,7 @@ class CNN(nn.Module):
 
         # Second Pooling Layer
         # (32x256x256) -> (32x128x128)
-        x = self.pool2(x)
+        x = self.pool(x)
 
         # Flatten Tensor to Vector
         # (32x128x128) -> [32x128x128]

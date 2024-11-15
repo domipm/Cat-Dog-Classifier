@@ -56,13 +56,13 @@ model = cnnmodel.CNN()
 model.model_summary(in_size = (tuple(train_dataset[0][0].shape)))
 
 # Training Hyperparameters
-epochs = 1
+epochs = 5
 learning_rate = 0.001
 
 # Loss Function
 criterion = nn.CrossEntropyLoss()
 # Optimizer (Stochastic Gradient Descent)
-optimizer = optim.SGD(model.parameters(), lr=learning_rate)
+optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
 def train(dataloader, model, criterion, optimizer):
 
@@ -77,7 +77,7 @@ def train(dataloader, model, criterion, optimizer):
         # Compute prediction
         pred = model(X)
         # Compute loss between prediction and real label
-        loss = criterion(pred, label)
+        loss = criterion(input=pred, target=label)
         # Backpropagation to compute gradients
         loss.backward()
         # Perform one step of optimizer, adjusting weights

@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import torch
+import torchvision
 import random
 import os
 
@@ -12,31 +13,17 @@ from datetime import datetime
 from torch.utils.data import Dataset
 from torchvision.transforms import v2
 
-# Image transformation properties
-image_size   =   [512,512]
-flip_prob    =   0.5
-deg_range    =   [-45,45]
-qual_range   =   np.random.randint(15,100)
-bright_range =   [0.5,1.5]
-contr_range  =   [0.5,1.5]
-satr_range   =   [0.5,1.5]
-
-# Define transform to use for data augmentation
-transform_on_image = v2.Compose([
-    v2.Resize(image_size),                      # Resize all images to the same square size
-    v2.RandomHorizontalFlip(p = flip_prob),     # Horizontally flip images randomly
-    v2.RandomRotation(degrees = deg_range),     # Rotate and expand the image
-    v2.JPEG(quality = qual_range),              # Add JPEG compression noise randomly
-    v2.ColorJitter(brightness = bright_range,   # Randomly change brightness, contrast, saturation (within reason)
-                    contrast = contr_range, 
-                    saturation = satr_range
-                    )
-])
-
-# Data transformation used (as a last step) to get the tensor image
+# Data transformation to tensorview.Image tensor
 transform_to_tensor = v2.Compose([
     v2.ToImage(),
     v2.ToDtype(torch.float32, scale = True)
+])
+
+# Data transformation for augmentation
+transform_augment = v2.Compose([
+    v2.Resize([512,512]),
+    v2.RandomHorizontalFlip(p=0.5),
+    v2.RandAugment(num_ops=5, magnitude=10),
 ])
 
 # Custom class for loading cats and dogs dataset
@@ -53,7 +40,7 @@ class CatsDogsDataset(Dataset):
         for obj in self.classes_folders:
             self.classes.append(obj[:-1])
         # Class-to-integer encoding
-        self.class_to_idx = {class_name: idx for idx, class_name in enumerate(self.classes)}
+        self.class_to_idx = {class_name: idx for idx, class_name in enumerate(np.sort(self.classes))}
         # List of all the images in dataset
         self.images = self.list_images()
         return
@@ -70,22 +57,22 @@ class CatsDogsDataset(Dataset):
         path = self.directory + class_type + "s/" + file    
         # Open image using PIL
         image = Image.open(path)
-        # Apply augmentation transforms
-        image = transform_on_image(image)
-        # Apply image-to-tensor transform
+        # Transform to tensor object
         image = transform_to_tensor(image)
-        # Convert class_type into tensor
-        class_type = self.class_to_idx[class_type]
+        # Apply augmentation
+        image = transform_augment(image)
+        # Convert class_type to int
+        class_type = torch.tensor(self.class_to_idx[class_type], dtype=torch.long)
         # Return image and class, both tensors
         return image, class_type
     
-    # Function that shows random image in the dataset (without transform))
+    # Function that shows random, original image in the dataset (without augmentation transform)
     def show_random(self):
-        # Pick random class
+        # Pick random class (folder) and image
         rand_class = random.choice(self.classes_folders)
-        rand_image = random.choice(os.listdir(self.directory + rand_class + "/"))
-        # Read image using PIL Image
-        image = Image.open(self.directory + rand_class + "/" + rand_image)
+        rand_image = random.choice(os.listdir(os.path.join(self.directory, rand_class)))
+        # Open image using PIL Image
+        image = Image.open(os.path.join(self.directory, rand_class, rand_image))
         # Show image using matplotlib
         plt.title(rand_image)
         plt.axis("Off")
@@ -94,26 +81,28 @@ class CatsDogsDataset(Dataset):
         return
 
     # Just to showcase how the original and randomly transformed image
-    def show_random_transform(self, show = False, save = True):
+    def show_random_transform(self, show = True, save = False, n_images = 3):
         # Pick random class and image
         rand_class = random.choice(self.classes_folders)
-        rand_image = random.choice(os.listdir(self.directory + rand_class + "/"))
-        # Read image using PIL Image
-        image = Image.open(self.directory + rand_class + "/" + rand_image)
-        # Apply the transformations (a couple of times)
-        n_transforms = 3
-        image_transformed = np.empty(n_transforms, dtype=object)
+        rand_image = random.choice(os.listdir(os.path.join(self.directory, rand_class)))
         # Setup matplotlib and show/save sample figure
-        _, ax = plt.subplots(nrows=1, ncols=4)
+        _, ax = plt.subplots(nrows=1, ncols=1+n_images)
+        # Read image using PIL Image
+        image = Image.open(os.path.join(self.directory, rand_class, rand_image))
+        # Transform image to tensor without applying augmentation
+        image = transform_to_tensor(image)
         # Show original
-        ax[0].imshow(image)
+        ax[0].imshow(image.permute(1,2,0))
         ax[0].set_title(rand_image)
         ax[0].set_title(rand_class + str(rand_image).split(".")[1] + "(Org)")
         ax[0].axis("Off")
+        # Apply the transformations (a couple of times)
+        image_transformed = np.empty(n_images, dtype=object)
         # Show samples
-        for i in range(n_transforms):
-            image_transformed[i] = transform_on_image(image)
-            ax[i+1].imshow(image_transformed[i])
+        for i in range(n_images):
+            image_transformed[i] = transform_to_tensor(image)
+            image_transformed[i] = transform_augment(image)
+            ax[i+1].imshow(image_transformed[i].permute(1,2,0))
             ax[i+1].set_title(rand_class + str(rand_image).split(".")[1] + "(Aug)")
             ax[i+1].axis("Off")
         # Save figure
@@ -123,10 +112,11 @@ class CatsDogsDataset(Dataset):
     
     # Function that returns all images in dataset (their paths and names)
     def list_images(self):
-        # Define relevant arrays
+        # Empty array that contains all files
         arr = []
-        # Iterate over all classes, and over all files in each class subfolder
+        # Iterate over all classes
         for class_type in self.classes_folders:
-            for file in os.listdir(self.directory + class_type + "/"):
+            # Iterate over all files in subfolders
+            for file in os.listdir(os.path.join(self.directory, class_type)):
                 arr.append(file)
         return arr
