@@ -31,31 +31,38 @@ class CNN(nn.Module):
     def forward(self, x):
 
         # First Convolutional Layer + ReLU Activation
+        # (3x512x512) -> (16x512x512)
         x = self.conv1(x)
         x = F.relu(x)
 
         # First Pooling Layer
+        # (16x512x512) -> (16x256x256)
         x = self.pool1(x)
 
         # Second Convolutional Layer + ReLU Activation
+        # (16x256x256) -> (32x256x256)
         x = self.conv2(x)
         x = F.relu(x)
 
         # Second Pooling Layer
+        # (32x256x256) -> (32x128x128)
         x = self.pool2(x)
 
         # Flatten Tensor to Vector
+        # (32x128x128) -> [32x128x128]
         x = x.view(-1, 32*128*128)
 
-        # First Fully-Connected (Dense) Layer -> THIS STEP STOPS WORKING!
+        # First Fully-Connected (Dense) Layer
+        # [32x128x128] -> [128]
         x = self.dense1(x)
         x = F.relu(x)
 
         # Second Fully-Connected (Dense) Layer
+        # [128] -> [2]
         x = self.dense2(x)
         x = F.relu(x)
 
-        # Non-Linear Activation Function
+        # Non-Linear Activation Function (on spatial dimension)
         output = F.log_softmax(x, dim=1)
         
         return output
@@ -64,5 +71,4 @@ class CNN(nn.Module):
     def model_summary(self, in_size):
 
         summary(self, input_size = in_size)
-        print()
         return
