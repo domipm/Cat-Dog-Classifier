@@ -60,7 +60,6 @@ class CNN(nn.Module):
         # Second Fully-Connected (Dense) Layer
         # [128] -> [2]
         x = self.dense2(x)
-        x = F.relu(x)
 
         # Non-Linear Activation Function (on spatial dimension)
         output = F.log_softmax(x, dim=1)
