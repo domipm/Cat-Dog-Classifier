@@ -31,7 +31,7 @@ random.seed(rand_seed)
 torch.manual_seed(rand_seed)
 
 # Batchsize to load from data
-batchsize = 32
+batchsize = 16
 
 # Initialize training dataset
 train_dataset = dataloader.CatsDogsDataset(train_dir)
@@ -60,9 +60,9 @@ epochs = 1
 learning_rate = 0.001
 
 # Loss Function
-criterion = nn.NLLLoss()
+criterion = nn.CrossEntropyLoss()
 # Optimizer (Stochastic Gradient Descent)
-optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+optimizer = optim.SGD(model.parameters(), lr=learning_rate)
 
 def train(dataloader, model, criterion, optimizer):
 
@@ -82,15 +82,11 @@ def train(dataloader, model, criterion, optimizer):
         loss.backward()
         # Perform one step of optimizer, adjusting weights
         optimizer.step()
-
-        # Debug parameter gradients
-        #for name, param in model.named_parameters():
-        #    print(name, param.grad)
-
+        # Print progress parameters
         print('Batch {}/{}\tLoss: {:f}'.format(batch+1, len(dataloader), loss.item()))
 
+# Run over all epochs
 for epoch in range(epochs):
-
     print(f"\nEpoch {epoch+1}\n" + "-"*64)
     train(train_loader, model, criterion, optimizer)
 
