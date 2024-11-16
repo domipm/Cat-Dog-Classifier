@@ -54,5 +54,5 @@ class CatsDogsDataset(Dataset):
         ])(image)
 
         # Return image and class, both tensors
-        if return_name == None: return image, class_type
-        else: return image, class_type, self.images[index][:-4]
+        if return_name == True: return image, class_type, self.images[index][:-4]
+        return image, class_type
