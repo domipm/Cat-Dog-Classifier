@@ -58,7 +58,7 @@ test_loader = DataLoader(test_dataset, batch_size = batchsize, shuffle = True)
 model = cnnmodel.CNN(train_dataset[0][0].shape)
 
 # Training Hyperparameters
-epochs = 20
+epochs = 5
 learning_rate = 0.001
 
 # Loss Function
@@ -142,11 +142,13 @@ for epoch in range(epochs):
     # Print out average training loss for each epoch 
     print('- Avg. Epoch Test  Loss: {:.6f}'.format(avg_test_loss), end="\n\n") 
 
+print("-"*64)
+
 # After training the model, save the parameters
 torch.save(model.state_dict(), save_path)
 
 # Directory to save plot
-plot_dir = "./samples/"
+plot_dir = "./graphs/"
 # Plot training and testing loss over time
 fig, ax = plt.subplots()
 ax.plot(np.arange(epochs), train_loss_epoch, label="Train loss")
