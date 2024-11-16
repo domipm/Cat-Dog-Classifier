@@ -9,7 +9,6 @@ import torch.nn as nn
 import torch.optim as optim
 
 from torch.utils.data import DataLoader
-from torchvision.utils import make_grid
 from torchvision.transforms import v2
 
 from datetime import datetime
