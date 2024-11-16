@@ -1,6 +1,8 @@
 import random
 import numpy as np
+
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 
 import torch
 import torch.nn as nn
@@ -57,7 +59,7 @@ test_loader = DataLoader(test_dataset, batch_size = batchsize, shuffle = True)
 model = cnnmodel.CNN(train_dataset[0][0].shape)
 
 # Training Hyperparameters
-epochs = 10
+epochs = 20
 learning_rate = 0.001
 
 # Loss Function
@@ -143,3 +145,17 @@ for epoch in range(epochs):
 
 # After training the model, save the parameters
 torch.save(model.state_dict(), save_path)
+
+# Directory to save plot
+plot_dir = "./samples/"
+# Plot training and testing loss over time
+fig, ax = plt.subplots()
+ax.plot(np.arange(epochs), train_loss_epoch, label="Train loss")
+ax.plot(np.arange(epochs), test_loss_epoch, label="Test loss")
+ax.set_title("Train/Test Loss")
+ax.set_xlabel("Epochs")
+ax.set_ylabel("Average epoch loss")
+ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+plt.legend()
+plt.savefig(plot_dir + str("loss_traintest.png"), dpi=300)
+plt.show()
