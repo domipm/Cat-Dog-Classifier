@@ -46,8 +46,9 @@ class CatsDogsDataset(Dataset):
         image_path = os.path.join(self.directory, image.split(".")[0] + "s", image)
         # Open image using PIL.Image
         image = Image.open(image_path)
-        # Transform the image to a tensor object (and resize)
+        # Transform the image according to augmentation transform
         if transformed == True: image = self.transform(image)
+        # If transform not given, simply convert to tensor
         else: image = v2.Compose([
             v2.ToImage(),
             v2.ToDtype(dtype=torch.float32, scale=True)
