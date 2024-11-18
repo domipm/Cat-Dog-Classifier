@@ -171,3 +171,6 @@ tempCodeRunnerFile.py
 
 # PyTorch Model Parameters
 model_params.pt
+
+# Testing scripts
+testing.py
