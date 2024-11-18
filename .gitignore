@@ -167,6 +167,7 @@ tempCodeRunnerFile.py
 
 # Dataset (ignore for now)
 /catdog_data/
+/old_params/
 
 # PyTorch Model Parameters
 model_params.pt
