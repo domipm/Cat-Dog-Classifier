@@ -4,8 +4,7 @@ import os
 from PIL import Image
 
 from torchvision.transforms import v2
-
-from torch.utils.data import Dataset
+from torch.utils.data       import Dataset
 
 # Custom class for loading cats and dogs dataset
 class CatsDogsDataset(Dataset):
@@ -15,7 +14,7 @@ class CatsDogsDataset(Dataset):
 
         # Initialize parent class
         super().__init__()
-        
+
         # Initialize directory
         self.directory = directory
         # Find how many folders are in directory
