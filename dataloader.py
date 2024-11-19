@@ -13,8 +13,9 @@ class CatsDogsDataset(Dataset):
     # Initialization function for dataset
     def __init__(self, directory, transform = None):
 
+        # Initialize parent class
         super().__init__()
-
+        
         # Initialize directory
         self.directory = directory
         # Find how many folders are in directory
