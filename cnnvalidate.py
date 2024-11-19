@@ -18,7 +18,7 @@ valid_dir = "./catdog_data/validation/"
 output_dir = "./output/"
 
 # Image size
-image_size = (64,)*2
+image_size = (128,)*2
 
 # Normalization params. of train data
 mean = (0.4854, 0.4515, 0.4143)
