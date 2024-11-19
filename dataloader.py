@@ -51,6 +51,6 @@ class CatsDogsDataset(Dataset):
         # Apply transformations if given
         if self.transform != None: image = self.transform(image)
         # Otherwise, just transform to tensor
-        else: image = v2.Compose([v2.ToImage(), v2.ToDtype(torch.float, scale=True)])
+        else: image = v2.Compose([v2.ToImage(), v2.ToDtype(torch.float, scale=True)])(image)
         # Return tensor image and class integer (0: Dog, 1: Cat)
         return image, class_type
