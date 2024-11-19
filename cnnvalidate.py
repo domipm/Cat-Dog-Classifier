@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import torch
 import torch.nn as nn
 
+from PIL import Image
+
 from torch.utils.data       import DataLoader
 from torchvision.transforms import v2
 
@@ -108,4 +110,31 @@ for n in range(n_images):
     ax[n].set_title(pred_lab + "({:.2f}%)".format(prob*100))
 # Plot and save figure
 plt.savefig(output_dir + "batchvalid.png", dpi=300, bbox_inches="tight")
+plt.show()
+
+# Validate model on custom image
+image_org = Image.open("./cat/IMG_20210319_130644.jpg")
+# Convert it to a tensor and resize
+# Define transform to perform on testing images (no augmentation)
+image_transform = v2.Compose([
+                    v2.Resize(image_size),
+                    v2.ToImage(),
+                    v2.ToDtype(torch.float32, scale=False),
+                ])
+# Apply transform
+image = image_transform(image_org)
+# Compute the model output
+output = model(image.unsqueeze(0))
+# Probability
+prob = out.max()
+# Label prediction
+pred_lab = output.argmax(1)
+# Convert label integer to class name
+if pred_lab == 0: pred_lab = "Dog"
+elif pred_lab == 1: pred_lab = "Cat"
+# Plot image
+plt.imshow(image_org)
+plt.title(pred_lab + " ({:.2f}%)".format(prob))
+plt.axis("Off")
+plt.savefig(output_dir + "cat.png", dpi=300, bbox_inches="tight")
 plt.show()
