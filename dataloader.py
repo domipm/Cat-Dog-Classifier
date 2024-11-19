@@ -3,15 +3,17 @@ import os
 
 from PIL import Image
 
-from torch.utils.data import Dataset
-
 from torchvision.transforms import v2
+
+from torch.utils.data import Dataset
 
 # Custom class for loading cats and dogs dataset
 class CatsDogsDataset(Dataset):
 
     # Initialization function for dataset
-    def __init__(self, directory, transform):
+    def __init__(self, directory, transform = None):
+
+        super().__init__()
 
         # Initialize directory
         self.directory = directory
@@ -34,7 +36,7 @@ class CatsDogsDataset(Dataset):
         return len(self.images)
     
     # Get single item from dataset (for indexing dataset[i] returns i-th sample)
-    def __getitem__(self, index, transformed = True, return_name = None):
+    def __getitem__(self, index):
 
         # Get the image with specificed index
         image = self.images[index]
@@ -44,16 +46,11 @@ class CatsDogsDataset(Dataset):
         class_type = torch.tensor(self.class_to_label[class_type], dtype=torch.long)
         # Get the path to that image (directory/class_plural/class.*)
         image_path = os.path.join(self.directory, image.split(".")[0] + "s", image)
-        # Open image using PIL.Image
+        # Open image using PIL.Image and apply relevant transformations
         image = Image.open(image_path)
-        # Transform the image according to augmentation transform
-        if transformed == True: image = self.transform(image)
-        # If transform not given, simply convert to tensor
-        else: image = v2.Compose([
-            v2.ToImage(),
-            v2.ToDtype(dtype=torch.float32, scale=True)
-        ])(image)
-
-        # Return image and class, both tensors
-        if return_name == True: return image, class_type, self.images[index][:-4]
+        # Apply transformations if given
+        if self.transform != None: image = self.transform(image)
+        # Otherwise, just transform to tensor
+        else: image = v2.Compose([v2.ToImage(), v2.ToDtype(torch.float, scale=True)])
+        # Return tensor image and class integer
         return image, class_type
